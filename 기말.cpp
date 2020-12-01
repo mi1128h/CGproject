@@ -1,17 +1,22 @@
 #include <cstdlib>
 #include "Foothold.h"
 #include"filetobuf.h"
+#include "Robot.h"
 #define pi 3.141592
 
 
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
+GLvoid KeyboardUp(unsigned char key, int x, int y);
 //void Mouse(int button, int state, int x, int y);
 //void MouseMove(GLint x, GLint y);
 void Timerfunction(int value);
 void make_vertexShader();
 void make_fragmentShader();
+
+void check_collide();
+bool collide_box(Foothold, Robot&);
 
 using namespace std;
 
@@ -27,8 +32,6 @@ float theta = 0;
 float cx = 1, cy = 1, cz = 1;
 
 using namespace std;
-
-
 
 GLfloat	box[][3] = {
 	{ -0.5, 0, 0.5 },
@@ -130,6 +133,7 @@ GLfloat	boxN[][3] = {
 };
 
 std::vector<Foothold> Bottom;
+Robot player;
 
 void init()
 {
@@ -196,7 +200,6 @@ void InitShader()
 	glUseProgram(s_program);
 }
 
-
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	srand(time(0));
@@ -216,11 +219,16 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	init();
 	MakeFoothold(Bottom);
 
+	player.y = 5;
+	player.fall = true;
+	player.Locate();
+
 	glutTimerFunc(100, Timerfunction, 1);
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Keyboard);
+	glutKeyboardUpFunc(KeyboardUp);
 	glutMainLoop();
 }
 
@@ -228,17 +236,18 @@ void Timerfunction(int value)
 {
 	switch (value) {
 	case 1:
-		/*		for (int i = 0; i < Bottom.size(); ++i) {
-			//if() 충돌체크 성공시
-				Bottom[i].Delete();
-			if (Bottom[i].Del)
-				Bottom.erase(Bottom.begin()+i);
-		} */
+		player.Update();
+		check_collide();
 
-		// delete test
-		Bottom[0].Delete();
-	if (Bottom[0].Del)
-		Bottom.erase(Bottom.begin());
+		for (int i = 0; i < Bottom.size(); ++i) {
+			if (Bottom[i].startDel)
+				Bottom[i].Delete();
+		}
+
+		for (int i = 0; i < Bottom.size(); ++i) {
+			if (Bottom[i].Del)
+				Bottom.erase(Bottom.begin() + i);
+		}
 
 		glutPostRedisplay();
 		glutTimerFunc(100, Timerfunction, 1);
@@ -286,7 +295,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	camY = +0.0;
 	camZ = -1 * (float)cos(theta / 180 * 3.141592) * radius;
 	//vtrans = glm::lookAt(glm::vec3(camX,camY,camZ), glm::vec3(X,Y,Z-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	vtrans = glm::lookAt(glm::vec3(0, 0, 0 + 5), glm::vec3(camX, camY, camZ), glm::vec3(0.0f, 1.0f, 0.0f));
+	vtrans = glm::lookAt(glm::vec3(0, player.y + 3, player.z + 3), glm::vec3(camX, player.y, player.z), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	unsigned int view = glGetUniformLocation(s_program, "view");
 	glUniformMatrix4fv(view, 1, GL_FALSE, &vtrans[0][0]);
@@ -306,6 +315,32 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 		glDrawArrays(GL_TRIANGLES, 0, Bottom[i].size);
 	}
 
+	// head
+	glUniform3f(color_location, player.head.r, player.head.g, player.head.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.head.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// nose
+	glUniform3f(color_location, player.nose.r, player.nose.g, player.nose.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.nose.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// body
+	glUniform3f(color_location, player.body.r, player.body.g, player.body.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.body.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// arm
+	glUniform3f(color_location, player.arm_l.r, player.arm_l.g, player.arm_l.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.arm_l.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glUniform3f(color_location, player.arm_r.r, player.arm_r.g, player.arm_r.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.arm_r.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// leg
+	glUniform3f(color_location, player.leg_l.r, player.leg_l.g, player.leg_l.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.leg_l.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glUniform3f(color_location, player.leg_r.r, player.leg_r.g, player.leg_r.b);
+	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.leg_r.TRS)));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glutSwapBuffers();
 }
@@ -321,6 +356,35 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+	case 'w':
+	{
+		player.dz = -0.1;
+		player.angle_turn = 180;
+		break;
+	}
+	case 'a':
+	{
+		player.dx = -0.1;
+		player.angle_turn = -90;
+		break;
+	}
+	case 's':
+	{
+		player.dz = 0.1;
+		player.angle_turn = 0;
+		break;
+	}
+	case 'd':
+	{
+		player.dx = 0.1;
+		player.angle_turn = 90;
+		break;
+	}
+	case 32:
+	{
+		player.Jump();
+		break;
+	}
 	case 'p':
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		break;
@@ -333,4 +397,62 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	InitBuffer();
 	glutPostRedisplay();
+}
+
+GLvoid KeyboardUp(unsigned char key, int x, int y)
+{
+	switch (key){
+	case 'w': case 's':
+	{
+		player.dz = 0;
+		break;
+	}
+	case 'a': case'd':
+	{
+		player.dx = 0;
+		break;
+	}
+	}
+	glutPostRedisplay();
+}
+
+void check_collide()
+{
+	player.fall = true;
+	for (int i = 0; i < Bottom.size(); ++i) {
+		if (collide_box(Bottom[i], player)) {
+			player.fall = false;
+			player.dy = 0;
+			Bottom[i].startDel = true;
+			break;
+		}
+	}
+
+	for (int i = 0; i < Bottom.size(); ++i) {
+		if (Bottom[i].Del)
+			Bottom.erase(Bottom.begin() + i);
+	}
+}
+
+bool collide_box(Foothold bottom, Robot& player)
+{
+	float b_maxX, b_minX, p_maxX, p_minX;
+	float b_maxY, b_minY, p_maxY, p_minY;
+	float b_maxZ, b_minZ, p_maxZ, p_minZ;
+	p_maxX = player.x + 0.15; p_minX = player.x - 0.15;
+	p_maxY = player.y + 0.1; p_minY = player.y - 0.1;
+	p_maxZ = player.z + 0.15; p_minZ = player.z - 0.15;
+
+	b_maxX = bottom.mx + 0.4; b_minX = bottom.mx - 0.4;
+	b_maxY = bottom.my + 0.35; b_minY = bottom.my + 0.25;
+	b_maxZ = bottom.mz + 0.4; b_minZ = bottom.mz - 0.4;
+
+	if (b_maxX < p_minX || b_minX > p_maxX)
+		return false;  
+	if (b_maxZ < p_minZ || b_minZ > p_maxZ)
+		return false;
+	if (b_maxY < p_minY || b_minY > p_maxY)
+		return false;
+	player.y = bottom.my + 0.3;
+	return true;
 }

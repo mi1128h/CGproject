@@ -34,6 +34,7 @@ public:
 	glm::mat4 Rotate;
 	glm::mat4 Drawing;
 	bool Del = FALSE;
+	bool startDel = false;
 
 public:
 	Foothold(float x, float y, float z, float R, float G, float B) :

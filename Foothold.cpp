@@ -49,7 +49,7 @@ void MakeFoothold(vector<Foothold> &Bottom)
 		{
 			for (int j = 0; j < N; ++j)
 			{
-				Bottom.push_back(Foothold(-2.0f + (foothold_sizex + 0.1f) * j, 2.0f - 1.0f * k, -2.0f + (foothold_sizez + 0.1f) * i
+				Bottom.push_back(Foothold(-2.0f + (foothold_sizex + 0.1f) * j, 2.0f - 5.0f * k, -2.0f + (foothold_sizez + 0.1f) * i
 					, r, g, b));
 			}	// -화면크기 + (발판사이즈 + 간격) 
 		}
