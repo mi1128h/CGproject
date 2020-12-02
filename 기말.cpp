@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <cstdlib>
 #include "Foothold.h"
 #include"filetobuf.h"
@@ -15,6 +16,7 @@ void Timerfunction(int value);
 void make_vertexShader();
 void make_fragmentShader();
 
+void renderBitmapCharacher(float x, float y, float z, void* font, char* string);
 void check_collide();
 bool collide_box(Foothold, Robot&);
 
@@ -30,6 +32,10 @@ GLchar* vertexsource, * fragmentsource; // 소스코드 저장 변수
 GLuint vertexshader, fragmentshader; // 세이더 객체
 float theta = 0;
 float cx = 1, cy = 1, cz = 1;
+
+int font = (int)GLUT_BITMAP_TIMES_ROMAN_24;
+int score = 0;
+char char_score[256];
 
 using namespace std;
 
@@ -246,12 +252,25 @@ void Timerfunction(int value)
 
 		for (int i = 0; i < Bottom.size(); ++i) {
 			if (Bottom[i].Del)
+			{
+				score += Bottom[i].score;
 				Bottom.erase(Bottom.begin() + i);
+			}
 		}
 
 		glutPostRedisplay();
 		glutTimerFunc(100, Timerfunction, 1);
 		break;
+	}
+}
+
+void renderBitmapCharacher(float x, float y, float z, void* font, char* string)
+{
+	char* c;
+	glRasterPos3f(x, y, z);
+	for (c = string; *c != '\0'; c++)
+	{
+		glutBitmapCharacter(font, *c);
 	}
 }
 
@@ -341,6 +360,9 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glUniform3f(color_location, player.leg_r.r, player.leg_r.g, player.leg_r.b);
 	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.leg_r.TRS)));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	sprintf(char_score, "%d", score);
+	renderBitmapCharacher(0.5f, 0.5f, 0, (void*)font, char_score);
 
 	glutSwapBuffers();
 }

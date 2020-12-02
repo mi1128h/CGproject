@@ -29,6 +29,8 @@ public:
 	int size;
 	int ani;
 	float theta;
+	int score;
+
 	glm::mat4 Move;
 	glm::mat4 Scale;
 	glm::mat4 Rotate;
@@ -42,6 +44,11 @@ public:
 		cx{ foothold_sizex }, cy{ foothold_sizey }, cz{ foothold_sizez },
 		r{ R }, g{ G }, b{ B }, size{ foothold_vertex }{
 			ani = rand() % 2;
+
+			if (my < 0)
+				score = 100 * (-my);
+			else
+				score = 100 * my;
 	}
 
 	~Foothold(){}
