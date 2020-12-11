@@ -19,6 +19,7 @@ void make_fragmentShader();
 void renderBitmapCharacher(float x, float y, float z, void* font, char* string);
 void check_collide();
 bool collide_box(Foothold, Robot&);
+void Time_score();
 
 using namespace std;
 
@@ -36,6 +37,8 @@ float cx = 1, cy = 1, cz = 1;
 int font = (int)GLUT_BITMAP_TIMES_ROMAN_24;
 int score = 0;
 char char_score[256];
+clock_t past;
+clock_t present;
 
 using namespace std;
 
@@ -274,17 +277,24 @@ void renderBitmapCharacher(float x, float y, float z, void* font, char* string)
 	}
 }
 
+void Time_score()
+{
+	present = clock() / 360;
+	if (present - past)
+		if (!(present % 3))
+			score += 1;
+	past = clock() / 360;
+}
+
 float radius = 5, camX=0,camY=0,camZ=0;
 float lx = 3.0, ly = 2.0, lz = -1.5, ltheta=0; 
 float Lx = 0, Ly = 0, Lz = 0;
-float aml = 0.3f;
+float aml = 0.35f;
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
-	//--- 변경된 배경색 설정
 	glClearColor(0.2, 0.2, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// 렌더링 파이프라인에 세이더 불러오기
 
 	glUseProgram(s_program);
 
@@ -299,9 +309,9 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	Ly = ly;
 	Lz = (float)sin(ltheta / 180 * 3.141592) * (-lz);
 
-	unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos"); //--- lightPos 값 전달: (0.0, 0.0, 5.0);
+	unsigned int lightPosLocation = glGetUniformLocation(s_program, "lightPos");
 	glUniform3f(lightPosLocation, Lx,Ly,Lz);
-	unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor"); //--- lightColor 값 전달: (1.0, 1.0, 1.0) 백색
+	unsigned int lightColorLocation = glGetUniformLocation(s_program, "lightColor");
 	glUniform3f(lightColorLocation, cx, cy, cz);
 	unsigned int amlight = glGetUniformLocation(s_program, "ambientLight");
 	glUniform1f(amlight, aml);
@@ -362,7 +372,8 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	sprintf(char_score, "%d", score);
-	renderBitmapCharacher(0.5f, 0.5f, 0, (void*)font, char_score);
+	renderBitmapCharacher(0.8f, 0.8f, 0, (void*)font, char_score);
+	Time_score();
 
 	glutSwapBuffers();
 }

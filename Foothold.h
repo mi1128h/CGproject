@@ -46,9 +46,9 @@ public:
 			ani = rand() % 2;
 
 			if (my < 0)
-				score = 100 * (-my);
+				score = 10 * (-my);
 			else
-				score = 100 * my;
+				score = 10 * my;
 	}
 
 	~Foothold(){}
