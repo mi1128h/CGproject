@@ -279,11 +279,10 @@ void renderBitmapCharacher(float x, float y, float z, void* font, char* string)
 
 void Time_score()
 {
-	present = clock() / 360;
+	present = clock() / 1000;
 	if (present - past)
-		if (!(present % 3))
 			score += 1;
-	past = clock() / 360;
+	past = clock() / 1000;
 }
 
 float radius = 5, camX=0,camY=0,camZ=0;
@@ -489,3 +488,7 @@ bool collide_box(Foothold bottom, Robot& player)
 	player.y = bottom.my + 0.3;
 	return true;
 }
+
+// 게임 종료 구현
+// 게임 종료 시 생존시간 출력
+// 발판 애니메이션 추가
