@@ -214,7 +214,7 @@ void main(int argc, char** argv)
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA|GLUT_DEPTH);
-	glutInitWindowPosition(0, 0);
+	glutInitWindowPosition(400, 100);
 	glutInitWindowSize(600, 600);
 	glutCreateWindow("±â¸»");
 
@@ -329,8 +329,7 @@ GLvoid drawScene()
 	camX = (float)sin(theta / 180 * 3.141592) * radius;
 	camY = +0.0;
 	camZ = -1 * (float)cos(theta / 180 * 3.141592) * radius;
-	//vtrans = glm::lookAt(glm::vec3(camX,camY,camZ), glm::vec3(X,Y,Z-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	vtrans = glm::lookAt(glm::vec3(0, player.y + 3, player.z + 3), glm::vec3(camX, player.y, player.z), glm::vec3(0.0f, 1.0f, 0.0f));
+	vtrans = glm::lookAt(glm::vec3(player.x, player.y + 1, player.z + 2), glm::vec3(player.x, player.y, player.z), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	unsigned int view = glGetUniformLocation(s_program, "view");
 	glUniformMatrix4fv(view, 1, GL_FALSE, &vtrans[0][0]);
