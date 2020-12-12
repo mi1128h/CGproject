@@ -18,6 +18,7 @@ using namespace std;
 #define N 5
 #define foothold_vertex 36
 #define MAX 32767.0f			// 실수 rand() 위한 변수값
+#define UNDER -20.0f
 
 class Foothold {
 public:

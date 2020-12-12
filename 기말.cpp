@@ -16,7 +16,10 @@ void Timerfunction(int value);
 void make_vertexShader();
 void make_fragmentShader();
 
-void renderBitmapCharacher(float x, float y, float z, void* font, char* string);
+void renderBitmapCharacher(float, float , float, void*, char* );
+void Print_word(float, float, float, float, int, char*);
+void check_GameOver();
+
 void check_collide();
 bool collide_box(Foothold, Robot&);
 void Time_score();
@@ -29,16 +32,21 @@ int g_window_h;
 GLuint vao, vbo[2];
 GLuint s_program;
 
-GLchar* vertexsource, * fragmentsource; // 소스코드 저장 변수
-GLuint vertexshader, fragmentshader; // 세이더 객체
+GLchar* vertexsource, * fragmentsource; 
+GLuint vertexshader, fragmentshader; 
 float theta = 0;
 float cx = 1, cy = 1, cz = 1;
 
 int font = (int)GLUT_BITMAP_TIMES_ROMAN_24;
 int score = 0;
 char char_score[256];
+char word1[10] = "score:";
+char word2[11] = "life time:";
+char over[10] = "Game Over";
 clock_t past;
 clock_t present;
+clock_t start;
+bool game_over = false;
 
 using namespace std;
 
@@ -152,33 +160,25 @@ void init()
 void make_vertexShader()
 {
 	vertexsource = filetobuf("vertex.glsl");
-	//--- 버텍스 세이더 객체 만들기
 	vertexshader = glCreateShader(GL_VERTEX_SHADER);
-	//--- 세이더 코드를 세이더 객체에 넣기
 	glShaderSource(vertexshader, 1, (const GLchar**)&vertexsource, 0);
-	//--- 버텍스 세이더 컴파일하기
 	glCompileShader(vertexshader);
-	//--- 컴파일이 제대로 되지 않은 경우: 에러 체크
 	checkCompileErrors(vertexshader, "vertex shader");
 }
 
 void make_fragmentShader()
 {
 	fragmentsource = filetobuf("fragment.glsl");
-	//--- 프래그먼트 세이더 객체 만들기
 	fragmentshader = glCreateShader(GL_FRAGMENT_SHADER);
-	//--- 세이더 코드를 세이더 객체에 넣기
 	glShaderSource(fragmentshader, 1, (const GLchar**)&fragmentsource, 0);
-	//--- 프래그먼트 세이더 컴파일
 	glCompileShader(fragmentshader);
-	//--- 컴파일이 제대로 되지 않은 경우: 컴파일 에러 체크
 	checkCompileErrors(fragmentshader, "fragment shader");
 }
 
 void InitBuffer()
 {
-	glGenVertexArrays(1, &vao); //--- VAO 를 지정하고 할당하기
-	glGenBuffers(2, vbo); //--- 2개의 VBO를 지정하고 할당하기
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(2, vbo);
 
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -196,30 +196,28 @@ void InitShader()
 {
 	make_vertexShader();
 	make_fragmentShader();
-	//-- shader Program
+
 	s_program = glCreateProgram();
 	glAttachShader(s_program, vertexshader);
 	glAttachShader(s_program, fragmentshader);
 	glLinkProgram(s_program);
 	checkCompileErrors(s_program, "PROGRAM");
-	//--- 세이더 삭제하기
 	glDeleteShader(vertexshader);
 	glDeleteShader(fragmentshader);
-	//--- Shader Program 사용하기
+
 	glUseProgram(s_program);
 }
 
-void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
+void main(int argc, char** argv)
 {
 	srand(time(0));
 
-	//--- 윈도우 생성하기
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA|GLUT_DEPTH);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(600, 600);
 	glutCreateWindow("기말");
-	//--- GLEW 초기화하기
+
 	glewExperimental = GL_TRUE;
 	glewInit();
 	InitShader();
@@ -227,6 +225,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 
 	init();
 	MakeFoothold(Bottom);
+	start = clock()/1000;
 
 	player.y = 5;
 	player.fall = true;
@@ -262,7 +261,8 @@ void Timerfunction(int value)
 		}
 
 		glutPostRedisplay();
-		glutTimerFunc(100, Timerfunction, 1);
+		if(!game_over)
+			glutTimerFunc(100, Timerfunction, 1);
 		break;
 	}
 }
@@ -275,6 +275,13 @@ void renderBitmapCharacher(float x, float y, float z, void* font, char* string)
 	{
 		glutBitmapCharacter(font, *c);
 	}
+}
+
+void Print_word(float word_x, float word_y, float x, float y, int num, char* word)
+{
+	renderBitmapCharacher(word_x, word_y, 0, (void*)font, word);
+	sprintf(char_score, "%d", num);
+	renderBitmapCharacher(x, y, 0, (void*)font, char_score);
 }
 
 void Time_score()
@@ -290,9 +297,9 @@ float lx = 3.0, ly = 2.0, lz = -1.5, ltheta=0;
 float Lx = 0, Ly = 0, Lz = 0;
 float aml = 0.35f;
 
-GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
+GLvoid drawScene()
 {
-	glClearColor(0.2, 0.2, 0.2f, 1.0f);
+	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(s_program);
@@ -370,14 +377,28 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(glm::mat4(player.leg_r.TRS)));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	sprintf(char_score, "%d", score);
-	renderBitmapCharacher(0.8f, 0.8f, 0, (void*)font, char_score);
-	Time_score();
+	check_GameOver();
+
+	if(!game_over)
+		Time_score();
+	Print_word(0.5f, 0.8f, 0.7f, 0.8f, score,word1);
+	Print_word(0.5f, 0.7f, 0.8f, 0.7f,present-start, word2);
 
 	glutSwapBuffers();
 }
 
-GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
+void check_GameOver()
+{
+	if(game_over)
+		renderBitmapCharacher(-0.2f,0.0f, 0, (void*)font, over);
+	else
+	{
+		if (player.y < UNDER)
+			game_over = true;
+	}
+}
+
+GLvoid Reshape(int w, int h)
 {
 	g_window_w = w;
 	g_window_h = h;
@@ -386,6 +407,9 @@ GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
+	if (game_over)
+		return;
+
 	switch (key)
 	{
 	case 'w':
@@ -489,6 +513,5 @@ bool collide_box(Foothold bottom, Robot& player)
 	return true;
 }
 
-// 게임 종료 구현
-// 게임 종료 시 생존시간 출력
-// 발판 애니메이션 추가
+// 게임 종료
+// font출력에 사용한 변수값 선언위치 따로 정리해두기
