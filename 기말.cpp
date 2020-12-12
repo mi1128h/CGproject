@@ -24,6 +24,8 @@ void check_collide();
 bool collide_box(Foothold, Robot&);
 void Time_score();
 
+void Init_Game();
+
 using namespace std;
 
 int g_window_w;
@@ -224,14 +226,8 @@ void main(int argc, char** argv)
 	InitBuffer();
 
 	init();
-	MakeFoothold(Bottom);
-	start = clock()/1000;
-
-	player.y = 5;
-	player.fall = true;
-	player.Locate();
-
-	glutTimerFunc(100, Timerfunction, 1);
+	
+	Init_Game();
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
@@ -262,7 +258,7 @@ void Timerfunction(int value)
 
 		glutPostRedisplay();
 		if(!game_over)
-			glutTimerFunc(100, Timerfunction, 1);
+			glutTimerFunc(50, Timerfunction, 1);
 		break;
 	}
 }
@@ -329,7 +325,7 @@ GLvoid drawScene()
 	camX = (float)sin(theta / 180 * 3.141592) * radius;
 	camY = +0.0;
 	camZ = -1 * (float)cos(theta / 180 * 3.141592) * radius;
-	vtrans = glm::lookAt(glm::vec3(player.x, player.y + 1, player.z + 2), glm::vec3(player.x, player.y, player.z), glm::vec3(0.0f, 1.0f, 0.0f));
+	vtrans = glm::lookAt(glm::vec3(player.x, player.y + 2, player.z + 2), glm::vec3(player.x, player.y, player.z), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	unsigned int view = glGetUniformLocation(s_program, "view");
 	glUniformMatrix4fv(view, 1, GL_FALSE, &vtrans[0][0]);
@@ -406,47 +402,59 @@ GLvoid Reshape(int w, int h)
 
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
-	if (game_over)
-		return;
-
-	switch (key)
-	{
-	case 'w':
-	{
-		player.dz = -0.1;
-		break;
+	if (game_over) {
+		switch (key) {
+		case 'R':
+		{
+			Init_Game();
+			break;
+		}
+		case 'Q':
+		{
+			exit(0);
+			break;
+		}
+		}
 	}
-	case 'a':
-	{
-		player.dx = -0.1;
-		break;
+	else {
+		switch (key)
+		{
+		case 'w':
+		{
+			player.dz = -0.1;
+			break;
+		}
+		case 'a':
+		{
+			player.dx = -0.1;
+			break;
+		}
+		case 's':
+		{
+			player.dz = 0.1;
+			break;
+		}
+		case 'd':
+		{
+			player.dx = 0.1;
+			break;
+		}
+		case 32:
+		{
+			player.Jump();
+			break;
+		}
+		case 'p':
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			break;
+		case 'P':
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			break;
+		case 'Q':
+			exit(0);
+			break;
+		}
 	}
-	case 's':
-	{
-		player.dz = 0.1;
-		break;
-	}
-	case 'd':
-	{
-		player.dx = 0.1;
-		break;
-	}
-	case 32:
-	{
-		player.Jump();
-		break;
-	}
-	case 'p':
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		break;
-	case 'P':
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		break;
-	case 'Q':
-		exit(0);
-		break;
-	}
-	InitBuffer();
 	glutPostRedisplay();
 }
 
@@ -506,6 +514,29 @@ bool collide_box(Foothold bottom, Robot& player)
 		return false;
 	player.y = bottom.my + 0.3;
 	return true;
+}
+
+void Init_Game()
+{
+	game_over = false;
+	score = 0;
+	start = clock() / 1000;
+	present = start;
+	past = start;
+
+	Bottom.clear();
+	MakeFoothold(Bottom);
+
+	player.x = 0;
+	player.y = 5;
+	player.z = 0;
+	player.dx = 0;
+	player.dy = 0;
+	player.dz = 0;
+	player.fall = true;
+	player.Locate();
+
+	glutTimerFunc(50, Timerfunction, 1);
 }
 
 // 게임 종료
