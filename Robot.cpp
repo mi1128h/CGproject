@@ -85,6 +85,7 @@ Robot::Robot()
 
 void Robot::Update()
 {
+	get_angle();
 	Fall();
 	Walk_anim();
 	x += dx;
@@ -153,4 +154,9 @@ void Robot::Fall()
 	if(fall)
 		if (dy > -0.2)
 			dy -= 0.03;
+}
+
+void Robot::get_angle()
+{
+	angle_turn = atan2f(dx, dz) * 180 / 3.141592;
 }

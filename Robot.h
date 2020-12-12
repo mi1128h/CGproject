@@ -41,4 +41,5 @@ struct Robot {
 	void Walk_anim();
 	void Jump();
 	void Fall();
+	void get_angle();
 };

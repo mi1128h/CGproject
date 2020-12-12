@@ -415,25 +415,21 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'w':
 	{
 		player.dz = -0.1;
-		player.angle_turn = 180;
 		break;
 	}
 	case 'a':
 	{
 		player.dx = -0.1;
-		player.angle_turn = -90;
 		break;
 	}
 	case 's':
 	{
 		player.dz = 0.1;
-		player.angle_turn = 0;
 		break;
 	}
 	case 'd':
 	{
 		player.dx = 0.1;
-		player.angle_turn = 90;
 		break;
 	}
 	case 32:
