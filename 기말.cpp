@@ -248,7 +248,7 @@ void Timerfunction(int value)
 				Bottom[i].Delete();
 		}
 
-		for (int i = 0; i < Bottom.size(); ++i) {
+		for (int i = Bottom.size() - 1; i >= 0; --i) {
 			if (Bottom[i].Del)
 			{
 				score += Bottom[i].score;
@@ -526,6 +526,20 @@ void Init_Game()
 
 	Bottom.clear();
 	MakeFoothold(Bottom);
+
+	for (int i = 0; i < 5; ++i) {
+		Bottom[rand() % 25].Del = true;
+		Bottom[rand() % 25 + 25].Del = true;
+		Bottom[rand() % 25 + 50].Del = true;
+		Bottom[rand() % 25 + 75].Del = true;
+		Bottom[rand() % 25 + 100].Del = true;
+	}
+	for (int i = Bottom.size() - 1; i >= 0; --i) {
+		if (Bottom[i].Del)
+		{
+			Bottom.erase(Bottom.begin() + i);
+		}
+	}
 
 	player.x = 0;
 	player.y = 5;
