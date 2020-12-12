@@ -158,5 +158,7 @@ void Robot::Fall()
 
 void Robot::get_angle()
 {
+	if (dx == 0 && dz == 0)
+		return;
 	angle_turn = atan2f(dx, dz) * 180 / 3.141592;
 }
