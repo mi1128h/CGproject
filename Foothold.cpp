@@ -46,7 +46,7 @@ void  Foothold::Delete() {
 
 	case 3:
 		rz = TRUE;
-		if (cnt % 2)
+		if (theta<0)
 			theta += rand() % 20;
 		else
 			theta -= rand() % 20;
