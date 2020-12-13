@@ -19,6 +19,7 @@ void make_fragmentShader();
 void renderBitmapCharacher(float, float , float, void*, char* );
 void Print_word(float, float, float, float, int, char*);
 void check_GameOver();
+void check_Bonus();
 
 void check_collide();
 bool collide_box(Foothold, Robot&);
@@ -41,6 +42,11 @@ float cx = 1, cy = 1, cz = 1;
 
 int font = (int)GLUT_BITMAP_TIMES_ROMAN_24;
 int score = 0;
+int cnt = 0;
+int p_cnt = 0;
+int tine = 0;
+int p_time = 0;
+
 char char_score[256];
 char word1[10] = "score:";
 char word2[11] = "life time:";
@@ -252,6 +258,7 @@ void Timerfunction(int value)
 			if (Bottom[i].Del)
 			{
 				score += Bottom[i].score;
+				++cnt;
 				Bottom.erase(Bottom.begin() + i);
 			}
 		}
@@ -376,8 +383,11 @@ GLvoid drawScene()
 
 	if(!game_over)
 		Time_score();
+
+	tine = present - start;
 	Print_word(0.5f, 0.8f, 0.7f, 0.8f, score,word1);
-	Print_word(0.5f, 0.7f, 0.8f, 0.7f,present-start, word2);
+	Print_word(0.5f, 0.7f, 0.8f, 0.7f,tine, word2);
+	check_Bonus();
 
 	glutSwapBuffers();
 }
@@ -391,6 +401,20 @@ void check_GameOver()
 		if (player.y < UNDER)
 			game_over = true;
 	}
+}
+
+void check_Bonus()
+{
+	if(cnt-p_cnt)
+		if (!(cnt % 10))
+			score += cnt*5;
+
+	if (tine - p_time)
+		if (!(tine% 10))
+			score += tine;
+
+	p_cnt = cnt;
+	p_time = present - start;
 }
 
 GLvoid Reshape(int w, int h)
