@@ -18,7 +18,7 @@ using namespace std;
 #define N 5
 #define foothold_vertex 36
 #define MAX 32767.0f			// 실수 rand() 위한 변수값
-#define UNDER -20.0f
+#define UNDER -23.0f
 
 class Foothold {
 public:
@@ -31,6 +31,7 @@ public:
 	int ani;
 	float theta;
 	int score;
+	int cnt;
 
 	glm::mat4 Move;
 	glm::mat4 Scale;
@@ -43,8 +44,9 @@ public:
 	Foothold(float x, float y, float z, float R, float G, float B) :
 		mx{ x }, my{ y }, mz{ z },
 		cx{ foothold_sizex }, cy{ foothold_sizey }, cz{ foothold_sizez },
-		r{ R }, g{ G }, b{ B }, size{ foothold_vertex }{
-			ani = rand() % 2;
+		r{ R }, g{ G }, b{ B }, size{ foothold_vertex },
+		rx{ FALSE }, ry{ FALSE }, rz{ FALSE }, theta{ 0 }, cnt{ 0 }{
+			ani = rand() % 5;
 
 			if (my < 0)
 				score = 10 * (-my);

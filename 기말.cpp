@@ -289,7 +289,7 @@ void Time_score()
 }
 
 float radius = 5, camX=0,camY=0,camZ=0;
-float lx = 3.0, ly = 2.0, lz = -1.5, ltheta=0; 
+float lx = 3.0, ly = 3.5, lz = -1.5, ltheta=0; 
 float Lx = 0, Ly = 0, Lz = 0;
 float aml = 0.35f;
 
@@ -552,6 +552,3 @@ void Init_Game()
 
 	glutTimerFunc(50, Timerfunction, 1);
 }
-
-// 게임 종료
-// font출력에 사용한 변수값 선언위치 따로 정리해두기
