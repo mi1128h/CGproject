@@ -145,7 +145,7 @@ void Robot::Jump()
 {     
 	if (fall == false) {
 		fall = true;
-		dy = 0.2;
+		dy = 0.25;
 	}
 }
 
